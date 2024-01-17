@@ -10,6 +10,10 @@ pub const RIPEMD160: PrecompileWithAddress = PrecompileWithAddress(
     crate::u64_to_address(3),
     Precompile::Standard(ripemd160_run as StandardPrecompileFn),
 );
+pub const SHA512: PrecompileWithAddress = PrecompileWithAddress(
+    crate::u64_to_address(512),
+    Precompile::Standard(sha512_run as StandardPrecompileFn),
+);
 
 /// See: <https://ethereum.github.io/yellowpaper/paper.pdf>
 /// See: <https://docs.soliditylang.org/en/develop/units-and-global-variables.html#mathematical-and-cryptographic-functions>
@@ -20,6 +24,17 @@ fn sha256_run(input: &[u8], gas_limit: u64) -> PrecompileResult {
         Err(Error::OutOfGas)
     } else {
         let output = sha2::Sha256::digest(input).to_vec();
+        Ok((cost, output))
+    }
+}
+/// Sha512 precompile
+/// See: <https://etherscan.io/address/0000000000000000000000000000000000000512>
+fn sha512_run(input: &[u8], gas_limit: u64) -> PrecompileResult {
+    let cost = calc_linear_cost_u32(input.len(), 60, 24);
+    if cost > gas_limit {
+        Err(Error::OutOfGas)
+    } else {
+        let output = sha2::Sha512::digest(input).to_vec();
         Ok((cost, output))
     }
 }
